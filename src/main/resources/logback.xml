@@ -1,0 +1,4 @@
+<configuration>
+    <logger name="ai.koog.agents.core.agent.entity.AIAgentSubgraph" level="OFF" />
+    <root level="OFF" />
+</configuration>

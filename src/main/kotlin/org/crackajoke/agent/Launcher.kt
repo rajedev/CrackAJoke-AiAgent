@@ -1,6 +1,14 @@
-package org.crackajoke.agent.org.crackajoke.agent
+package org.crackajoke.agent
 
+import ai.koog.agents.core.agent.AIAgent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.net.ConnectException
 
 /**
  * Created by Rajendhiran Easu on 26/08/25.
@@ -10,13 +18,16 @@ import kotlinx.coroutines.runBlocking
  */
 
 fun main() = runBlocking {
-    println("\n\nWelcome to the Crack A Joke Agent")
-    println("Type /bye to exit the conversation")
-    print("\nTell me your name, else I will call you User: ")
-
-    val userName = readlnOrNull()?.takeIf { it.isNotBlank() } ?: "User"
-    println("Agent: Thanks $userName, tell me what kind of joke you want?\n")
-
+    val userName = initializeUser()
+    val aiAgent by lazy {
+        val config = AiExecutor.Ollama.getConfig()
+        AIAgent(
+            executor = config.executor,
+            systemPrompt = config.systemPrompt,
+            llmModel = config.llm,
+            toolRegistry = config.tools
+        )
+    }
     while (true) {
         print("$userName: ")
         val userInput = readlnOrNull()
@@ -24,19 +35,49 @@ fun main() = runBlocking {
             println("Agent: Bye, Take care!")
             break
         }
-        //println("Agent: ${getRandomResponse()}")
         userInput?.let {
-            val result = aiAgent.run(it)
-            println("Agent: $result")
+            val (spinner, maxLen) = loading()
+            var result: String
+            try {
+                result = aiAgent.run(it)
+            } catch (_: ConnectException) {
+                println("AI Model is Unavailable")
+                break
+            } catch (e: Exception) {
+                println("Error occurred ${e.message}")
+                break
+            } finally {
+                spinner.cancelAndJoin()
+                clearAgentLoading(maxLen)
+            }
+            print("Agent: $result \n")
         }
     }
-    println("Conversation Ended \n")
 }
 
-fun getRandomResponse(): String {
-    return listOf(
-        "Hi", "how are you?", "What can I do for you?", "Tell me more",
-        "Go on...", "Interesting", "I see", "Could you explain further?",
-        "Why do you say that?", "How does that make you feel?"
-    ).random()
+private fun initializeUser(): String {
+    println("\n\nWelcome to the Crack A Joke Agent")
+    println("Type /bye to exit the conversation")
+    print("\nTell me your name, else I will call you User: ")
+
+    val userName = readlnOrNull()?.takeIf { it.isNotBlank() } ?: "User"
+    println("Agent: Thanks $userName, tell me what kind of joke you want?\n")
+    return userName
+}
+
+private fun clearAgentLoading(maxLen: Int) {
+    print("\r${" ".repeat(maxLen)}\r")
+}
+
+private fun CoroutineScope.loading(): Pair<Job, Int> {
+    val symbols = listOf("🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘")
+    val prefix = "AI Agent: "
+    val maxLength = prefix.length + 2
+    return Pair(first = launch {
+        var i = 0
+        while (isActive) {
+            print("\rAgent: ${symbols[i++ % symbols.size]}")
+            delay(100L)
+        }
+    }, second = maxLength)
 }

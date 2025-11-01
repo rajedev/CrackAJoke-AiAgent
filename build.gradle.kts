@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.serialization") version "2.2.0"
+    kotlin("jvm") version "2.2.21"
+    kotlin("plugin.serialization") version "2.2.21"
 }
 
 group = "org.crackajoke.agent"
@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("ai.koog:koog-agents:0.3.0")
+    implementation("ai.koog:koog-agents:0.5.2")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")

@@ -1,7 +1,6 @@
 package org.crackajoke.agent.tools
 
 import ai.koog.agents.core.tools.SimpleTool
-import ai.koog.agents.core.tools.ToolArgs
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.core.tools.ToolParameterDescriptor
 import ai.koog.agents.core.tools.ToolParameterType
@@ -28,31 +27,34 @@ object CrackAJokeTool : SimpleTool<CrackAJokeTool.Args>() {
     data class Args(
         val category: String,
         val type: String
-    ) : ToolArgs
+    )
 
     override val argsSerializer: KSerializer<Args> = Args.serializer()
+    override val description: String
+        get() = """Fetches a joke from the Joke API based on the specified 
+            category and type. The category can be one of the following: 
+            Any, Misc, Programming, Dark, Pun, Spooky, Christmas, or Miscellaneous. 
+            The type can be 'single' or 'twopart'.""".trimIndent()
 
     override val descriptor: ToolDescriptor = ToolDescriptor(
-        name = "fetchJoke",
-        description = """"You can use tools. When a tool is called, 
+        name = "CrackAJokeTool",
+        description = """You can use tools. When a tool is called,
                     wait and display its response exactly as received.
-                    Only use the CrackAJokeTool for jokes — do not 
-                    create or change jokes yourself."""".trimIndent(),
+                    Only use the CrackAJokeTool for jokes — do not
+                    create or change jokes yourself.""".trimIndent(),
         requiredParameters = listOf(
             ToolParameterDescriptor(
                 name = "category",
-                description = """"Map the joke category to one of the 
-                    following: Any, Misc, Programming, Dark, Pun, Spooky, 
-                    Christmas, or Miscellaneous.  You may resolve aliases 
-                    to these categories (e.g., 'Coding' → Programming, 
-                    'Halloween' → Spooky).  If no match is found, default 
-                    to 'Any'."""".trimIndent(),
+                description = """Map the joke category to one of the following:
+                    Any, Misc, Programming, Dark, Pun, Spooky, Christmas, or Miscellaneous.
+                    You may resolve aliases to these categories (e.g., 'Coding' → Programming,
+                    'Halloween' → Spooky). If no match is found, default to 'Any'.""".trimIndent(),
                 type = ToolParameterType.String
             ),
             ToolParameterDescriptor(
                 name = "type",
-                description = """"Set the joke type to 'single' or 'twopart'. 
-                    If not specified, default to 'twopart'."""".trimIndent(),
+                description = """Set the joke type to 'single' or 'twopart'.
+                    If not specified, default to 'twopart'.""".trimIndent(),
                 type = ToolParameterType.String
             )
         )

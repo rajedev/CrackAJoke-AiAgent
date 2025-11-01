@@ -24,7 +24,14 @@ object APIClient {
     }
 
     private val apiClient by lazy {
-        OkHttpClient()
+        OkHttpClient.Builder()
+            .connectionPool(connectionPool)
+            .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .addInterceptor(Interceptors.connectionAliveInterceptor(connectionPool))
+            .addNetworkInterceptor(Interceptors.logInterceptor())
+            .build()
     }
 
     private val contentType = "application/json".toMediaType()
@@ -32,16 +39,6 @@ object APIClient {
     private val format = Json {
         ignoreUnknownKeys = true
         explicitNulls = false
-    }
-
-    init {
-        apiClient.newBuilder()
-            .connectionPool(connectionPool)
-            .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-            .writeTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
-            .readTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-            .addInterceptor(Interceptors.connectionAliveInterceptor(connectionPool))
-            .addNetworkInterceptor(Interceptors.logInterceptor())
     }
 
     @OptIn(ExperimentalSerializationApi::class)

@@ -22,7 +22,7 @@ fun main() = runBlocking {
     val aiAgent by lazy {
         val config = AiExecutor.Ollama.getConfig()
         AIAgent(
-            executor = config.executor,
+            promptExecutor = config.executor,
             systemPrompt = config.systemPrompt,
             llmModel = config.llm,
             toolRegistry = config.tools

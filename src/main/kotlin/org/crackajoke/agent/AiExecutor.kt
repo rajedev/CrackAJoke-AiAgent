@@ -19,7 +19,7 @@ enum class AiExecutor {
     Ollama {
         override fun getConfig() = AIConfig(
             executor = simpleOllamaAIExecutor(baseUrl = "http://127.0.0.1:11434"),
-            llm = model("gpt-oss:latest", listOf(LLMCapability.Tools, LLMCapability.ToolChoice)),
+            llm = model("gpt-oss:20b", listOf(LLMCapability.Tools, LLMCapability.ToolChoice), LLMProvider.Ollama),
             systemPrompt = systemPrompt,
             tools = toolsRegistry
         )
@@ -27,7 +27,7 @@ enum class AiExecutor {
     OPENAI {
         override fun getConfig() = AIConfig(
             executor = simpleOpenAIExecutor(""),
-            llm = model("gpt-4o", listOf(LLMCapability.Tools, LLMCapability.ToolChoice)),
+            llm = model("", listOf(LLMCapability.Tools, LLMCapability.ToolChoice), LLMProvider.OpenAI),
             systemPrompt = systemPrompt,
             tools = toolsRegistry
         )
@@ -35,7 +35,7 @@ enum class AiExecutor {
     GEMINAI {
         override fun getConfig() = AIConfig(
             executor = simpleGoogleAIExecutor(""),
-            llm = model("gemini-1.5-pro", listOf(LLMCapability.Tools, LLMCapability.ToolChoice)),
+            llm = model("gemini-1.5-pro", listOf(LLMCapability.Tools, LLMCapability.ToolChoice), LLMProvider.Google),
             systemPrompt = systemPrompt,
             tools = toolsRegistry
         )
@@ -52,11 +52,12 @@ private val systemPrompt = """
                 when asked for a joke, and do not create or finish the joke yourself.
                 """.trimIndent()
 
-private val model: (String, List<LLMCapability>) -> LLModel = { modelName, llmCapability ->
+private val model: (String, List<LLMCapability>, LLMProvider) -> LLModel = { modelName, llmCapability, llmProvider ->
     LLModel(
-        provider = LLMProvider.Ollama,
+        provider = llmProvider,
         id = modelName,
-        capabilities = llmCapability
+        capabilities = llmCapability,
+        contextLength = 8192
     )
 }
 

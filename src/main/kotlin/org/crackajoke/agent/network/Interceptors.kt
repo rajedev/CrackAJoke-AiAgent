@@ -31,6 +31,6 @@ object Interceptors {
     }
 
     fun logInterceptor() = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = HttpLoggingInterceptor.Level.NONE
     }
 }
